@@ -4,12 +4,17 @@ Pseudo-code: guides/pseudocode/01_agent.md
 Kiểm tra:    pytest tests/test_02_agent.py
 """
 from pathlib import Path
+import os
+import shutil
+import subprocess
+import sys
 
-# TODO 1: import các thành phần cần dùng, ví dụ:
-#   from deepagents import create_deep_agent
-#   from deepagents.backends import LocalShellBackend
-#   from .model import make_model
-#   from .subagents import get_subagents
+from deepagents import create_deep_agent
+from deepagents.backends import LocalShellBackend
+from deepagents.backends.protocol import ExecuteResponse
+
+from .model import make_model
+from .subagents import get_subagents
 
 # ---- CÓ SẴN, KHÔNG SỬA: system prompt dùng chung cho mọi sinh viên (để đường cơ sở so sánh được) ----
 PATHS_NOTE = (
@@ -35,7 +40,39 @@ SUBAGENTS_NOTE = (
     "in the delegation message, because a subagent sees only what you send. "
     "Check what a subagent returns before you rely on it."
 )
+WINDOWS_NOTE = (
+    " Use `python` (not `python3`) and only the Python standard library; "
+    "do not use pandas or assume optional packages are installed. For multi-line Python, write a .py file "
+    "and run `python path/to/file.py`; do not put compound statements in `python -c`."
+)
 # --------------------------------------------------------------------------------------------------
+
+
+class _GitBashBackend(LocalShellBackend):
+    def __init__(self, *args, bash: Path, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._bash = bash
+
+    def execute(self, command: str, *, timeout: int | None = None) -> ExecuteResponse:
+        try:
+            result = subprocess.run(
+                [str(self._bash), "-lc", command], cwd=self.cwd, env=self._env,
+                capture_output=True, stdin=subprocess.DEVNULL, text=True,
+                timeout=timeout or self._default_timeout,
+            )
+        except subprocess.TimeoutExpired:
+            return ExecuteResponse(output="Error: Command timed out.", exit_code=124, truncated=False)
+        output = result.stdout
+        if result.stderr:
+            output += ("\n" if output else "") + "\n".join(
+                f"[stderr] {line}" for line in result.stderr.strip().splitlines()
+            )
+        if result.returncode:
+            output = f"{output.rstrip()}\n\nExit code: {result.returncode}"
+        if len(output) > self._max_output_bytes:
+            output = output[:self._max_output_bytes] + f"\n\n... Output truncated at {self._max_output_bytes} bytes."
+            return ExecuteResponse(output=output, exit_code=result.returncode, truncated=True)
+        return ExecuteResponse(output=output or "<no output>", exit_code=result.returncode, truncated=False)
 
 
 def make_backend(sandbox: Path):
@@ -47,7 +84,37 @@ def make_backend(sandbox: Path):
       - Tác tử chạy được lệnh shell và gọi được `python` (cần đặt PATH).
       - KHÔNG chuyển biến môi trường của bạn vào shell của tác tử (khóa API không được lộ).
     """
-    raise NotImplementedError("TODO 2: cài đặt make_backend (xem guides/pseudocode/01_agent.md)")
+    sandbox = Path(sandbox).resolve()
+    path_entries = [str(Path(sys.executable).parent)]
+    if os.name == "nt":
+        git = shutil.which("git")
+        if git:
+            unix_tools = Path(git).resolve().parent.parent / "usr" / "bin"
+            if unix_tools.is_dir():
+                path_entries.append(str(unix_tools))
+    else:
+        path_entries.extend(("/usr/local/bin", "/usr/bin", "/bin"))
+    env = {
+        "PATH": os.pathsep.join(path_entries),
+        "HOME": str(sandbox),
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+    backend = LocalShellBackend
+    options = {}
+    if os.name == "nt":
+        git = shutil.which("git")
+        bash = Path(git).resolve().parent.parent / "bin" / "bash.exe" if git else None
+        if bash and bash.is_file():
+            backend = _GitBashBackend
+            options["bash"] = bash
+    return backend(
+        root_dir=sandbox,
+        virtual_mode=True,
+        inherit_env=False,
+        env=env,
+        timeout=120,
+        **options,
+    )
 
 
 def build_agent(sandbox: Path, mode: str = "single", use_skills: bool = False, model=None):
@@ -64,4 +131,24 @@ def build_agent(sandbox: Path, mode: str = "single", use_skills: bool = False, m
     mode không hợp lệ -> ném ValueError.
     Trả về: đồ thị (graph) đã biên dịch, gọi bằng `.invoke({"messages": [...]})`.
     """
-    raise NotImplementedError("TODO 3: cài đặt build_agent (xem guides/pseudocode/01_agent.md)")
+    if mode not in {"single", "subagents"}:
+        raise ValueError(f"Unknown agent mode: {mode}")
+
+    prompt = BASE_PROMPT + (WINDOWS_NOTE if os.name == "nt" else "")
+    kwargs = {}
+    if mode == "subagents":
+        kwargs["subagents"] = [
+            {**sub, "system_prompt": sub["system_prompt"] + " " + PATHS_NOTE + (WINDOWS_NOTE if os.name == "nt" else "")}
+            for sub in get_subagents()
+        ]
+        prompt += SUBAGENTS_NOTE
+    if use_skills:
+        kwargs["skills"] = ["/skills/"]
+        prompt += SKILLS_NOTE
+
+    return create_deep_agent(
+        model=model or make_model(),
+        system_prompt=prompt,
+        backend=make_backend(sandbox),
+        **kwargs,
+    )

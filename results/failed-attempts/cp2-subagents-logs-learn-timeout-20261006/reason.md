@@ -1,0 +1,1 @@
+﻿Preserved before CP2 rerun. Original artifact: condition=subagents, task=logs-learn, timestamp=2026-10-06T10:18:29.671229+00:00, error=OpenAITimeoutError, seconds=125.8. This is an infrastructure/API timeout, so it is excluded from CP2 result analysis; only this task is retried once.

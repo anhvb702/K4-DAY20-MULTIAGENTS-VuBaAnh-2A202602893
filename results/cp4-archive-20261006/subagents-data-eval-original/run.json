@@ -1,0 +1,69 @@
+{
+  "task": "data-eval",
+  "condition": "subagents",
+  "role": "eval",
+  "timestamp": "2026-10-06T10:35:15.868784+00:00",
+  "error": "OpenAIRateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in organization org-UXwogwmlO2XjVLwUqzyhtOFq on tokens per min (TPM): Limit 200000, Used 191312, Requested 9031. Please try again in 102ms. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}",
+  "seconds": 117.3,
+  "tokens": {
+    "input": 571956,
+    "output": 4324,
+    "total": 576280
+  },
+  "tool_calls": 7,
+  "subagent_calls": 1,
+  "skills_read": 0,
+  "skills_modified": false,
+  "skills_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "final_message": "",
+  "score": 0.0,
+  "passed": 0,
+  "total": 9,
+  "checks": [
+    {
+      "name": "march_revenue_utc",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "march_orders_utc",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "top_category",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "missing_total_orders",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "duplicate_events_removed",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_money_in_cents",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_meta_block",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_clean_csv",
+      "passed": false,
+      "detail": ""
+    },
+    {
+      "name": "rule_sorted_keys_format",
+      "passed": false,
+      "detail": ""
+    }
+  ]
+}

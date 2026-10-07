@@ -1,0 +1,69 @@
+{
+  "task": "logs-learn",
+  "condition": "skills-auto",
+  "role": "learn",
+  "timestamp": "2026-10-06T15:10:30.765235+00:00",
+  "error": null,
+  "seconds": 180.1,
+  "tokens": {
+    "input": 14312,
+    "output": 16426,
+    "total": 30738
+  },
+  "tool_calls": 2,
+  "subagent_calls": 0,
+  "skills_read": 0,
+  "skills_modified": false,
+  "skills_sha256": "0612381bb302045aceb44d137388f7332c9aecf83f58ff041690665f5faffaf0",
+  "final_message": "",
+  "score": 0.0,
+  "passed": 0,
+  "total": 9,
+  "checks": [
+    {
+      "name": "valid_structure",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "entry_count",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "timestamps_utc",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "exception_fields",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "repeat_counts",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "counts_by_service",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "rule_service_names",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "rule_sorted_errors",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    },
+    {
+      "name": "rule_schema_header",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/lab-logs-learn-t02uoyb1/workspace/errors.json'"
+    }
+  ]
+}
